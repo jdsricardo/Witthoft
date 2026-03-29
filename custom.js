@@ -33,8 +33,47 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
-	const navLinks = document.querySelectorAll(".navbar-collapse .nav-link");
 	const navCollapse = document.querySelector(".navbar-collapse");
+	const navLinks = document.querySelectorAll(".navbar-collapse .nav-link");
+	const siteHeader = document.querySelector(".site-header");
+
+	if (siteHeader) {
+		let lastScrollY = window.scrollY;
+		let ticking = false;
+		const minDelta = 8;
+
+		const updateHeaderState = () => {
+			const currentScrollY = window.scrollY;
+			const delta = currentScrollY - lastScrollY;
+			const navOpen = navCollapse && navCollapse.classList.contains("show");
+
+			siteHeader.classList.toggle("is-scrolled", currentScrollY > 8);
+
+			if (currentScrollY <= 12 || navOpen) {
+				siteHeader.classList.remove("is-hidden");
+			} else if (Math.abs(delta) >= minDelta) {
+				if (delta > 0) {
+					siteHeader.classList.add("is-hidden");
+				} else {
+					siteHeader.classList.remove("is-hidden");
+				}
+			}
+
+			lastScrollY = currentScrollY;
+			ticking = false;
+		};
+
+		const onScroll = () => {
+			if (!ticking) {
+				window.requestAnimationFrame(updateHeaderState);
+				ticking = true;
+			}
+		};
+
+		window.addEventListener("scroll", onScroll, { passive: true });
+		updateHeaderState();
+	}
+
 	navLinks.forEach((link) => {
 		link.addEventListener("click", () => {
 			if (navCollapse && navCollapse.classList.contains("show") && window.bootstrap) {
